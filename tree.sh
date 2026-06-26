@@ -10,27 +10,24 @@ function output() {
 }
 
 function output_command() {
-  local destination="${2}"
-  local index=0
+  local -a command=("$@")
+  local index=2
   local next
-  local source="${1}"
+  local positional_start=$((${#command[@]} - 2))
 
-  output "${RCLONE_BIN} sync"
+  output "${command[0]} ${command[1]}"
 
-  while ((index < ${#RCLONE_ARGS[@]})); do
-    next=${RCLONE_ARGS[index + 1]-}
+  while ((index < ${#command[@]})); do
+    next=${command[index + 1]-}
 
-    if [[ "${RCLONE_ARGS[index]}" == --* && -n "${next}" && "${next}" != --* ]]; then
-      output "  ${RCLONE_ARGS[index]} ${next}"
+    if [[ "${command[index]}" == --* ]] && ((index + 1 < positional_start)) && [[ -n "${next}" && "${next}" != --* ]]; then
+      output "  ${command[index]} ${next}"
       ((index += 2))
     else
-      output "  ${RCLONE_ARGS[index]}"
+      output "  ${command[index]}"
       ((index++))
     fi
   done
-
-  output "  ${source}"
-  output "  ${destination}"
 }
 
 function rclone_exec() {
@@ -40,7 +37,7 @@ function rclone_exec() {
 
   command=("${RCLONE_BIN}" sync "${RCLONE_ARGS[@]}" "${trunk}" "${branch}")
 
-  output_command "${trunk}" "${branch}"
+  output_command "${command[@]}"
   echo
 
   "${command[@]}"
