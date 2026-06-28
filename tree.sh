@@ -82,7 +82,7 @@ SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
 while getopts "2b:c:df:k:l:s:t:" opt; do
   case $opt in
-    2) disable_http2=true ;;
+    2) enable_http2=true ;;
     b) rclone_bin=$OPTARG ;;
     c) rclone_config=$OPTARG ;;
     d) dry_run=true ;;
@@ -97,12 +97,12 @@ done
 
 RCLONE_BIN=${rclone_bin-rclone}
 RCLONE_BWLIMIT=${rclone_bwlimit-0}
-RCLONE_CHECKERS=${rclone_checkers-8}
-RCLONE_TRANSFERS=${rclone_transfers-4}
+RCLONE_CHECKERS=${rclone_checkers-32}
+RCLONE_TRANSFERS=${rclone_transfers-16}
 SHYAML_BIN=${shyaml_bin-shyaml}
 TREE_YAML=${tree_yaml-"${SCRIPT_DIR}/tree.yaml"}
 DRY_RUN=${dry_run-false}
-DISABLE_HTTP2=${disable_http2-false}
+ENABLE_HTTP2=${enable_http2-false}
 
 declare -a RCLONE_CONFIG_PATHS=(
   "${HOME}/.config/rclone/rclone.conf"
@@ -128,7 +128,7 @@ declare -a RCLONE_ARGS=(
 )
 
 [[ "${DRY_RUN}" = true ]] && RCLONE_ARGS+=(--dry-run)
-[[ "${DISABLE_HTTP2}" = true ]] && RCLONE_ARGS+=(--disable-http2)
+[[ "${ENABLE_HTTP2}" = false ]] && RCLONE_ARGS+=(--disable-http2)
 
 tree_length=$(yaml_length tree)
 
